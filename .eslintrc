@@ -18,7 +18,10 @@
       "error",
       "double"
     ],
-    "no-duplicate-imports": "error"
+    "no-duplicate-imports": "error",
+    "@typescript-eslint/explicit-function-return-type": [
+      "error"
+    ]
   },
   "settings": {
     "import/resolver": {
