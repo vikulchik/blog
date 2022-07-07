@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, TextField } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
-import axios from "axios";
-import { Promise } from "q";
-
-interface IRegister {
-  email: string;
-  password: string;
-}
+import { toast, ToastContainer } from "react-toastify";
+import { IRegisterRequest } from "../../DTOs/register-request-dto";
+import { auth } from "../../services/auth.serivce";
+import { localStorageService } from "../../services/local-storage.service";
+import "react-toastify/dist/ReactToastify.css";
 
 export function Register(): JSX.Element {
   const [name, setName] = useState<string>("");
@@ -16,35 +14,55 @@ export function Register(): JSX.Element {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const navigate = useNavigate();
 
-  const body: IRegister = {
+  const body: IRegisterRequest = {
     email,
     password
   };
 
-  useEffect(() => {
-    axios
-      .post("http://localhost:5000/api", body)
-      .then((response) => console.log(response))
-      .catch((error) => console.log("error"));
-  }, [name]);
+  async function register(): Promise<void> {
+    try {
+      const registerData = await auth.register(body);
+      const { token } = registerData.data;
+      localStorageService(token);
 
-  function onInput(e: any): any {
-    const { value } = e.target;
-    setName(value);
+      toast.success("Регистрация прошла успешно 🥳", {
+        position: toast.POSITION.TOP_CENTER
+      });
+
+      setTimeout((): any => {
+        navigate("/");
+      }, 3000);
+
+      // Think how to put token to axios interceptor
+    } catch (e) {
+      toast.error("Что-то пошло не так 😢!", {
+        position: toast.POSITION.TOP_LEFT
+      });
+      console.log(e);
+    }
+
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+    e.preventDefault();
+
+    await register();
   }
 
   return (
     <>
       <Link to="/">Homepage</Link>
-      <Grid container
-            spacing={ 2 }
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            className="wrapper"
+      <Grid
+        container
+        spacing={ 2 }
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        className="wrapper"
       >
-        <form encType="multipart/form-data" className="registration-form">
+        <form encType="multipart/form-data" className="registration-form" onSubmit={ onSubmit }>
           <h1>Регистрация</h1>
           <TextField
             id="outlined-name-input"
@@ -52,7 +70,7 @@ export function Register(): JSX.Element {
             type="text"
             autoComplete="current-password"
             value={ name }
-            onInput={ onInput }
+            onChange={ ({ target }: any): any => setName(target.value) }
           />
           <TextField
             id="outlined-lastName-input"
@@ -60,6 +78,7 @@ export function Register(): JSX.Element {
             type="text"
             autoComplete="current-password"
             value={ lastName }
+            onChange={ ({ target }: any): any => setLastName(target.value) }
           />
           <TextField
             id="outlined-email-input"
@@ -67,6 +86,7 @@ export function Register(): JSX.Element {
             type="email"
             autoComplete="current-password"
             value={ email }
+            onChange={ ({ target }: any): any => setEmail(target.value) }
           />
           <TextField
             id="outlined-password-input"
@@ -74,6 +94,7 @@ export function Register(): JSX.Element {
             type="password"
             autoComplete="current-password"
             value={ password }
+            onChange={ ({ target }: any): any => setPassword(target.value) }
           />
           <TextField
             id="outlined-confirm-password-input"
@@ -84,6 +105,17 @@ export function Register(): JSX.Element {
           />
           <Button type="submit" variant="contained">Зарегистрироваться</Button>
         </form>
+        <ToastContainer
+          position="top-center"
+          autoClose={ 2000 }
+          hideProgressBar={ false }
+          newestOnTop={ false }
+          closeOnClick
+          rtl={ false }
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
       </Grid>
     </>
   );
