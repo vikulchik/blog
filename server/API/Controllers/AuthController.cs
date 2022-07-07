@@ -21,7 +21,6 @@ namespace API.Controllers
         {
             _tokenService = tokenService;
             _context = context;
-
         }
 
         [HttpPost("register")]
@@ -41,6 +40,7 @@ namespace API.Controllers
 
             return new UserDto
             {
+                Email = user.Email,
                 Name = user.Name,
                 Token = _tokenService.CreateToken(user)
             };

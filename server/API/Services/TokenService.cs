@@ -23,8 +23,7 @@ namespace API.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, user.Name),
-                new Claim(JwtRegisteredClaimNames.Email, "test"),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("my", "test")
             };
 
