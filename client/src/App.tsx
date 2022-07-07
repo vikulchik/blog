@@ -2,11 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./App.css";
 
-interface IUser {
-  name: string;
-  token: string;
-}
-
 const AuthContext = React.createContext({});
 
 function App(): JSX.Element {

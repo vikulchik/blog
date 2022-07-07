@@ -9,7 +9,7 @@ import {
   Route
 } from "react-router-dom";
 import { Register } from "./pages/register/register.component";
-
+import "./settings/api.request.middleware";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

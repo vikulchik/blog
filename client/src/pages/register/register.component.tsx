@@ -5,8 +5,8 @@ import Grid from "@mui/material/Grid";
 import { toast, ToastContainer } from "react-toastify";
 import { IRegisterRequest } from "../../DTOs/register-request-dto";
 import { auth } from "../../services/auth.serivce";
-import { localStorageService } from "../../services/local-storage.service";
 import "react-toastify/dist/ReactToastify.css";
+import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 
 export function Register(): JSX.Element {
   const [name, setName] = useState<string>("");
@@ -23,24 +23,29 @@ export function Register(): JSX.Element {
 
   async function register(): Promise<void> {
     try {
-      const registerData = await auth.register(body);
-      const { token } = registerData.data;
-      localStorageService(token);
+      await auth.register(body);
 
       toast.success("Регистрация прошла успешно 🥳", {
         position: toast.POSITION.TOP_CENTER
       });
 
-      setTimeout((): any => {
+      setTimeout(() => {
         navigate("/");
       }, 3000);
 
-      // Think how to put token to axios interceptor
-    } catch (e) {
+    } catch (e: unknown) {
+      const error = e as ErrorResponseDto;
       toast.error("Что-то пошло не так 😢!", {
         position: toast.POSITION.TOP_LEFT
       });
-      console.log(e);
+
+      Object.values(error.response.data.errors).forEach((errors) => {
+        const errorMsg = errors.join("; ");
+        toast.error(errorMsg, {
+          position: toast.POSITION.TOP_LEFT
+        });
+      });
+      console.error(e);
     }
 
   }

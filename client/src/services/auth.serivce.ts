@@ -1,16 +1,24 @@
 import axios from "axios";
 import { IRegisterRequest } from "../DTOs/register-request-dto";
 import { IRegisterResponse } from "../DTOs/register-response-dto";
+import { config } from "../config";
+import { localStorageService } from "./local-storage.service";
 
-function register(body: IRegisterRequest): Promise<any> {
-  return axios
-    .post<IRegisterRequest, IRegisterResponse>("http://localhost:5000/api/auth/register", body, {
-      headers: {
-        "Content-Type": "Application/json"
-      }
-    });
+async function register(body: IRegisterRequest): Promise<any> {
+  // registerData.data;
+  const { data } = await axios
+    .post<IRegisterRequest, IRegisterResponse>(`${ config.apiUrl }/auth/register`, body);
+
+  if (data.token) {
+    localStorageService.save("token", data.token);
+  }
+}
+
+function logout(): void {
+  localStorageService.remove("token");
 }
 
 export const auth = {
   register
+  // logout
 };

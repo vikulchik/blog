@@ -1,4 +1,7 @@
 export interface IRegisterResponse {
-  name: string;
-  token: string;
+  data: {
+    name: string;
+    token: string;
+  };
+  status: number;
 }
