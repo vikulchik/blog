@@ -30,6 +30,7 @@ namespace API.Controllers
             using var hmac = new HMACSHA512();
             var user = new User
             {
+                Name = registerDto.Name,
                 Email = registerDto.Email.ToLower(),
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
                 PasswordSalt = hmac.Key
