@@ -21,7 +21,6 @@ namespace API.Controllers
         {
             _tokenService = tokenService;
             _context = context;
-
         }
 
         [HttpPost("register")]
@@ -31,6 +30,7 @@ namespace API.Controllers
             using var hmac = new HMACSHA512();
             var user = new User
             {
+                Name = registerDto.Name,
                 Email = registerDto.Email.ToLower(),
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
                 PasswordSalt = hmac.Key
@@ -41,6 +41,7 @@ namespace API.Controllers
 
             return new UserDto
             {
+                Email = user.Email,
                 Name = user.Name,
                 Token = _tokenService.CreateToken(user)
             };
