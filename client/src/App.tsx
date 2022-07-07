@@ -2,8 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./App.css";
 
-const AuthContext = React.createContext({});
-
 function App(): JSX.Element {
   return (
     <div className="App">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
@@ -7,6 +7,8 @@ import { IRegisterRequest } from "../../DTOs/register-request-dto";
 import { auth } from "../../services/auth.serivce";
 import "react-toastify/dist/ReactToastify.css";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
+import { AuthContext } from "../../context/auth.context";
+import { IAuthContext } from "../../interfaces/auth-context.interface";
 
 export function Register(): JSX.Element {
   const [email, setEmail] = useState<string>("");
@@ -14,6 +16,8 @@ export function Register(): JSX.Element {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const navigate = useNavigate();
+
+  const authContext = useContext<IAuthContext | null>(AuthContext);
 
   const body: IRegisterRequest = {
     email,
@@ -24,6 +28,10 @@ export function Register(): JSX.Element {
   async function register(): Promise<void> {
     try {
       await auth.register(body);
+      authContext?.setAuthContext({
+        name: body.name,
+        email: body.email
+      });
 
       toast.success("Регистрация прошла успешно 🥳", {
         position: toast.POSITION.TOP_CENTER
