@@ -21,34 +21,30 @@ namespace API.Controllers
         {
             _tokenService = tokenService;
             _context = context;
-
         }
 
         [HttpPost("register")]
-        public ActionResult<UserDto> Register(RegisterRequestDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterRequestDto registerDto)
         {
-                return new UserDto
-                {
-                    Name = "Vika",
-                    Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlZpa2EiLCJpYXQiOjE1MTYyMzkwMjJ9.U-Li24-GFRYfZa47by-kkYcYn6JaF0hwYH3mHgvNcb8"
-                };
-//             if (await UserExist(registerDto.Email)) return BadRequest("User is taken");
-//             using var hmac = new HMACSHA512();
-//             var user = new User
-//             {
-//                 Email = registerDto.Email.ToLower(),
-//                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-//                 PasswordSalt = hmac.Key
-//             };
-//
-//             _context.Users.Add(user);
-//             await _context.SaveChangesAsync();
-//
-//             return new UserDto
-//             {
-//                 Name = user.Name,
-//                 Token = _tokenService.CreateToken(user)
-//             };
+            if (await UserExist(registerDto.Email)) return BadRequest("User is taken");
+            using var hmac = new HMACSHA512();
+            var user = new User
+            {
+                Name = registerDto.Name,
+                Email = registerDto.Email.ToLower(),
+                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
+                PasswordSalt = hmac.Key
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return new UserDto
+            {
+                Email = user.Email,
+                Name = user.Name,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         [HttpPost("login")]
