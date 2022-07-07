@@ -9,16 +9,16 @@ import "react-toastify/dist/ReactToastify.css";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 
 export function Register(): JSX.Element {
-  const [name, setName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const navigate = useNavigate();
 
   const body: IRegisterRequest = {
     email,
-    password
+    password,
+    name
   };
 
   async function register(): Promise<void> {
@@ -70,20 +70,12 @@ export function Register(): JSX.Element {
         <form encType="multipart/form-data" className="registration-form" onSubmit={ onSubmit }>
           <h1>Регистрация</h1>
           <TextField
-            id="outlined-name-input"
-            label="Name"
+            id="outlined-email-input"
+            label="Username"
             type="text"
             autoComplete="current-password"
             value={ name }
             onChange={ ({ target }: any): any => setName(target.value) }
-          />
-          <TextField
-            id="outlined-lastName-input"
-            label="Last Name"
-            type="text"
-            autoComplete="current-password"
-            value={ lastName }
-            onChange={ ({ target }: any): any => setLastName(target.value) }
           />
           <TextField
             id="outlined-email-input"

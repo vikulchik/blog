@@ -5,7 +5,6 @@ import { config } from "../config";
 import { localStorageService } from "./local-storage.service";
 
 async function register(body: IRegisterRequest): Promise<any> {
-  // registerData.data;
   const { data } = await axios
     .post<IRegisterRequest, IRegisterResponse>(`${ config.apiUrl }/auth/register`, body);
 
@@ -19,6 +18,6 @@ function logout(): void {
 }
 
 export const auth = {
-  register
-  // logout
+  register,
+  logout
 };
