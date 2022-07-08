@@ -7,6 +7,7 @@ function App(): JSX.Element {
     <div className="App">
       <h1>Homepage</h1>
       <Link to="/register">Register</Link>
+      <Link to="/login">Login</Link>
     </div>
   );
 }

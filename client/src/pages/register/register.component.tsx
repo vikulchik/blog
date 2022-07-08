@@ -109,6 +109,7 @@ export function Register(): JSX.Element {
             value={ confirmPassword }
           />
           <Button type="submit" variant="contained">Зарегистрироваться</Button>
+          <Link to="/login">Login</Link>
         </form>
         <ToastContainer
           position="top-center"
