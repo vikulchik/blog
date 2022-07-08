@@ -8,5 +8,6 @@ namespace API.Interfaces
         Task CreateUserAsync(User user);
         Task<bool> IsUserExist(string email);
         Task<IEnumerable<User>> GetUsers();
+        Task<bool> UpdateAsync(User user);
     }
 }
