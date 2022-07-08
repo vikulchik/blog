@@ -11,6 +11,7 @@ import {
 import { Register } from "./pages/register/register.component";
 import "./settings/api.request.middleware";
 import { AuthContext } from "./context/auth.context";
+import { Login } from "./pages/login/login.component";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -24,6 +25,7 @@ function Main(): JSX.Element {
         <Routes>
           <Route path="/" element={ <App /> } />
           <Route path="/register" element={ <Register /> } />
+          <Route path="/login" element={ <Login /> } />
         </Routes>
       </BrowserRouter>
     </AuthContext.Provider>
