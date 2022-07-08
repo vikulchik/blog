@@ -15,12 +15,12 @@ namespace API.Controllers
 {
     public class AuthController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly ITokenService _tokenService;
-        public AuthController(DataContext context, ITokenService tokenService)
+        private readonly IUserRepository _userRepository;
+        public AuthController(IUserRepository userRepository, ITokenService tokenService)
         {
+            _userRepository = userRepository;
             _tokenService = tokenService;
-            _context = context;
         }
 
         [HttpPost("register")]
@@ -36,8 +36,8 @@ namespace API.Controllers
                 PasswordSalt = hmac.Key
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.CreateUserAsync(user);
+
 
             return new UserDto
             {
@@ -50,8 +50,7 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginRequestDto loginDto)
         {
-            var user = await _context.Users
-            .SingleOrDefaultAsync(user => user.Email == loginDto.Email.ToLower());
+            var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
 
             if (user == null) return Unauthorized("Invalid usernname");
 
@@ -65,14 +64,15 @@ namespace API.Controllers
 
             return new UserDto
             {
+                Email = user.Email,
                 Name = user.Name,
                 Token = _tokenService.CreateToken(user)
             };
         }
 
-        private async Task<bool> UserExist(string name)
+        private async Task<bool> UserExist(string email)
         {
-            return await _context.Users.AnyAsync(x => x.Name == name.ToLower());
+            return await _userRepository.IsUserExist(email);
         }
     }
 }
