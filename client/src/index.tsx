@@ -17,7 +17,7 @@ const root = ReactDOM.createRoot(
 );
 
 function Main(): JSX.Element {
-  const [authContext, setAuthContext] = useState({ name: "vika", email: "test@gmail.com" });
+  const [authContext, setAuthContext] = useState(null);
   return <React.StrictMode>
     <AuthContext.Provider value={ { value: authContext, setAuthContext } }>
       <BrowserRouter>
