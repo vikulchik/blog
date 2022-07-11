@@ -4,9 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import "react-toastify/dist/ReactToastify.css";
 import { auth } from "../../services/auth.serivce";
-import { toast } from "react-toastify";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 import { ILoginRequest } from "../../DTOs/login-request-dto";
+import { errorMessage } from "../../helpers/validation";
+import { ToastContainer } from "react-toastify";
 
 export function Login(): JSX.Element {
   const [password, setPassword] = useState<string>("");
@@ -18,6 +19,8 @@ export function Login(): JSX.Element {
     password
   };
 
+  let isValid = true;
+
   async function login(): Promise<void> {
     try {
       await auth.login(body);
@@ -28,25 +31,27 @@ export function Login(): JSX.Element {
 
     } catch (e: unknown) {
       const error = e as ErrorResponseDto;
-      toast.error("Что-то пошло не так 😢!", {
-        position: toast.POSITION.TOP_LEFT
-      });
 
-      Object.values(error.response.data.errors).forEach((errors) => {
-        const errorMsg = errors.join("; ");
-        toast.error(errorMsg, {
-          position: toast.POSITION.TOP_LEFT
+      isValid = false;
+
+      errorMessage("Что-то пошло не так 😢!");
+      errorMessage(error.response.data as unknown as string);
+
+      if (email.trim().length === 0 || password.trim().length === 0) {
+        Object.values(error.response.data.errors).forEach((errors) => {
+          const errorMsg = errors.join("; ");
+          errorMessage(errorMsg);
         });
-      });
+      }
       console.error(e);
     }
-
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-
-    await login();
+    if (isValid) {
+      await login();
+    }
   }
 
   return (
@@ -71,7 +76,7 @@ export function Login(): JSX.Element {
             onChange={ ({ target }: any): any => setEmail(target.value) }
           />
           <TextField
-            id="outlined-email-input"
+            id="outlined-password-input"
             label="Password"
             type="password"
             autoComplete="current-password"
@@ -79,8 +84,19 @@ export function Login(): JSX.Element {
             onChange={ ({ target }: any): any => setPassword(target.value) }
           />
           <Button type="submit" variant="contained">Войти</Button>
-          <Link to="/register">Register</Link>
         </form>
+        <ToastContainer
+          position="top-center"
+          autoClose={ 2000 }
+          hideProgressBar={ false }
+          newestOnTop={ false }
+          closeOnClick
+          rtl={ false }
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        <Link to="/register">Register</Link>
       </Grid>
     </>
   );

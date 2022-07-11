@@ -2,13 +2,14 @@ import React, { useContext, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { IRegisterRequest } from "../../DTOs/register-request-dto";
 import { auth } from "../../services/auth.serivce";
 import "react-toastify/dist/ReactToastify.css";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 import { AuthContext } from "../../context/auth.context";
 import { IAuthContext } from "../../interfaces/auth-context.interface";
+import { errorMessage, isValidEmail, successMessage } from "../../helpers/validation";
 
 export function Register(): JSX.Element {
   const [email, setEmail] = useState<string>("");
@@ -25,6 +26,8 @@ export function Register(): JSX.Element {
     name
   };
 
+  let isValid = true;
+
   async function register(): Promise<void> {
     try {
       await auth.register(body);
@@ -33,9 +36,7 @@ export function Register(): JSX.Element {
         email: body.email
       });
 
-      toast.success("Регистрация прошла успешно 🥳", {
-        position: toast.POSITION.TOP_CENTER
-      });
+      successMessage("Регистрация прошла успешно 🥳");
 
       setTimeout(() => {
         navigate("/");
@@ -43,25 +44,46 @@ export function Register(): JSX.Element {
 
     } catch (e: unknown) {
       const error = e as ErrorResponseDto;
-      toast.error("Что-то пошло не так 😢!", {
-        position: toast.POSITION.TOP_LEFT
-      });
 
-      Object.values(error.response.data.errors).forEach((errors) => {
-        const errorMsg = errors.join("; ");
-        toast.error(errorMsg, {
-          position: toast.POSITION.TOP_LEFT
-        });
-      });
+      errorMessage("Что-то пошло не так 😢!");
+      errorMessage(error.response.data as unknown as string);
+
       console.error(e);
     }
-
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
+    validation();
+    if (isValid) {
+      await register();
+    }
+  }
 
-    await register();
+  function validation(): any {
+    if (password !== confirmPassword) {
+      errorMessage("Пароли не совпадают!");
+
+      isValid = false;
+    }
+
+    if (!isValidEmail(email)) {
+      errorMessage("Не валидный email");
+
+      isValid = false;
+    }
+
+    if (name.trim().length === 0 || password.trim().length === 0) {
+      errorMessage("Не все поля заполнены");
+
+      isValid = false;
+    }
+
+    if (password.trim().length < 6) {
+      errorMessage("Знаков в пароле должно быть больше 6");
+
+      isValid = false;
+    }
   }
 
   return (
@@ -78,7 +100,7 @@ export function Register(): JSX.Element {
         <form encType="multipart/form-data" className="registration-form" onSubmit={ onSubmit }>
           <h1>Регистрация</h1>
           <TextField
-            id="outlined-email-input"
+            id="outlined-username-input"
             label="Username"
             type="text"
             autoComplete="current-password"
@@ -107,6 +129,7 @@ export function Register(): JSX.Element {
             type="password"
             autoComplete="current-password"
             value={ confirmPassword }
+            onChange={ ({ target }: any): any => setConfirmPassword(target.value) }
           />
           <Button type="submit" variant="contained">Зарегистрироваться</Button>
           <Link to="/login">Login</Link>
