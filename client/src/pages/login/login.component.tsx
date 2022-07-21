@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import { getErrorMessage } from "../../helpers/notification";
 import { isCorrectlyLength, isRequired, isValid, isValidEmail } from "../../helpers/validation";
 import { ValidationOption } from "../../interfaces/validation.interface";
+import ErrorComponent from "../../component/error.component";
 
 export function Login(): JSX.Element {
   const [password, setPassword] = useState<string>("");
@@ -54,7 +55,6 @@ export function Login(): JSX.Element {
       email,
       password
     }, options);
-    console.log(errors);
 
     setErrors(errors);
     if (Object.keys(errors).length) {
@@ -105,7 +105,7 @@ export function Login(): JSX.Element {
             value={ email }
             onChange={ ({ target }: any): any => setEmail(target.value) }
           />
-          { errors.email && errors.email.map((error) => <p className="error">{ error }</p>) }
+          { errors.email && errors.email.map((error) => <ErrorComponent msg={ error }></ErrorComponent>) }
           <TextField
             id="outlined-password-input"
             className="field"
@@ -115,7 +115,7 @@ export function Login(): JSX.Element {
             value={ password }
             onChange={ ({ target }: any): any => setPassword(target.value) }
           />
-          { errors.password && errors.password.map((error) => <p className="error">{ error }</p>) }
+          { errors.password && errors.password.map((error) => <ErrorComponent msg={ error }></ErrorComponent>) }
           <Button type="submit" variant="contained">Войти</Button>
         </form>
         <ToastContainer

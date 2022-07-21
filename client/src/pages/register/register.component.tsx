@@ -18,6 +18,7 @@ import {
 } from "../../helpers/validation";
 import { getErrorMessage, getSuccessMessage } from "../../helpers/notification";
 import { ValidationOption } from "../../interfaces/validation.interface";
+import ErrorComponent from "../../component/error.component";
 
 export function Register(): JSX.Element {
   const [email, setEmail] = useState<string>("");
@@ -118,7 +119,7 @@ export function Register(): JSX.Element {
             value={ name }
             onChange={ ({ target }: any): any => setName(target.value) }
           />
-          { errors.name && errors.name.map((error) => <p className="error">{ error }</p>) }
+          { errors.name && errors.name.map((error) => <ErrorComponent msg={ error }></ErrorComponent>) }
           <TextField
             id="outlined-email-input"
             className="field"
@@ -128,7 +129,7 @@ export function Register(): JSX.Element {
             value={ email }
             onChange={ ({ target }: any): any => setEmail(target.value) }
           />
-          { errors.email && errors.email.map((error) => <p className="error">{ error }</p>) }
+          { errors.email && errors.email.map((error) => <ErrorComponent msg={ error }></ErrorComponent>) }
           <TextField
             id="outlined-password-input"
             className="field"
@@ -138,8 +139,7 @@ export function Register(): JSX.Element {
             value={ password }
             onChange={ ({ target }: any): any => setPassword(target.value) }
           />
-          { errors.password && errors.password.map((error) => <p className="error">{ error }</p>) }
-
+          { errors.password && errors.password.map((error) => <ErrorComponent msg={ error }></ErrorComponent>) }
           <TextField
             id="outlined-confirm-password-input"
             className="field"
@@ -149,7 +149,8 @@ export function Register(): JSX.Element {
             value={ confirmPassword }
             onChange={ ({ target }: any): any => setConfirmPassword(target.value) }
           />
-          { errors.confirmPassword && errors.confirmPassword.map((error) => <p className="error">{ error }</p>) }
+          { errors.confirmPassword && errors.confirmPassword.map((error) => <ErrorComponent
+            msg={ error }></ErrorComponent>) }
           <Button type="submit" variant="contained">Зарегистрироваться</Button>
           <Link to="/login">Login</Link>
         </form>
