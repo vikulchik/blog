@@ -6,20 +6,22 @@ import "react-toastify/dist/ReactToastify.css";
 import { auth } from "../../services/auth.serivce";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 import { ILoginRequest } from "../../DTOs/login-request-dto";
-import { errorMessage } from "../../helpers/validation";
 import { ToastContainer } from "react-toastify";
+import { getErrorMessage } from "../../helpers/notification";
+import { isCorrectlyLength, isRequired, isValid, isValidEmail } from "../../helpers/validation";
+import { ValidationOption } from "../../interfaces/validation.interface";
 
 export function Login(): JSX.Element {
   const [password, setPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const navigate = useNavigate();
 
   const body: ILoginRequest = {
     email,
     password
   };
-
-  let isValid = true;
 
   async function login(): Promise<void> {
     try {
@@ -32,15 +34,13 @@ export function Login(): JSX.Element {
     } catch (e: unknown) {
       const error = e as ErrorResponseDto;
 
-      isValid = false;
-
-      errorMessage("Что-то пошло не так 😢!");
-      errorMessage(error.response.data as unknown as string);
+      getErrorMessage("Что-то пошло не так 😢!");
+      getErrorMessage(error.response.data as unknown as string);
 
       if (email.trim().length === 0 || password.trim().length === 0) {
         Object.values(error.response.data.errors).forEach((errors) => {
           const errorMsg = errors.join("; ");
-          errorMessage(errorMsg);
+          getErrorMessage(errorMsg);
         });
       }
       console.error(e);
@@ -49,10 +49,39 @@ export function Login(): JSX.Element {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    if (isValid) {
-      await login();
+
+    const errors = isValid({
+      email,
+      password
+    }, options);
+    console.log(errors);
+
+    setErrors(errors);
+    if (Object.keys(errors).length) {
+      return;
     }
+
+    await login();
   }
+
+  const options: ValidationOption = {
+    email: [
+      {
+        fn: isValidEmail,
+        msg: "Не валидный email"
+      }
+    ],
+    password: [
+      {
+        fn: (field: string) => isCorrectlyLength(field, 6),
+        msg: "Знаков в пароле должно быть больше 6"
+      },
+      {
+        fn: isRequired,
+        msg: "Введите свой пароль"
+      }
+    ]
+  };
 
   return (
     <>
@@ -69,20 +98,24 @@ export function Login(): JSX.Element {
           <h1>Авторизироваться</h1>
           <TextField
             id="outlined-email-input"
+            className="field"
             label="Email"
             type="email"
             autoComplete="current-password"
             value={ email }
             onChange={ ({ target }: any): any => setEmail(target.value) }
           />
+          { errors.email && errors.email.map((error) => <p className="error">{ error }</p>) }
           <TextField
             id="outlined-password-input"
+            className="field"
             label="Password"
             type="password"
             autoComplete="current-password"
             value={ password }
             onChange={ ({ target }: any): any => setPassword(target.value) }
           />
+          { errors.password && errors.password.map((error) => <p className="error">{ error }</p>) }
           <Button type="submit" variant="contained">Войти</Button>
         </form>
         <ToastContainer

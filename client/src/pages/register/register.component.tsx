@@ -9,13 +9,24 @@ import "react-toastify/dist/ReactToastify.css";
 import { ErrorResponseDto } from "../../DTOs/error-response-dto";
 import { AuthContext } from "../../context/auth.context";
 import { IAuthContext } from "../../interfaces/auth-context.interface";
-import { errorMessage, isValidEmail, successMessage } from "../../helpers/validation";
+import {
+  isCorrectlyLength,
+  isRequired,
+  isSame,
+  isValid,
+  isValidEmail
+} from "../../helpers/validation";
+import { getErrorMessage, getSuccessMessage } from "../../helpers/notification";
+import { ValidationOption } from "../../interfaces/validation.interface";
 
 export function Register(): JSX.Element {
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+
+
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const navigate = useNavigate();
 
   const authContext = useContext<IAuthContext | null>(AuthContext);
@@ -26,8 +37,6 @@ export function Register(): JSX.Element {
     name
   };
 
-  let isValid = true;
-
   async function register(): Promise<void> {
     try {
       await auth.register(body);
@@ -36,7 +45,7 @@ export function Register(): JSX.Element {
         email: body.email
       });
 
-      successMessage("Регистрация прошла успешно 🥳");
+      getSuccessMessage("Регистрация прошла успешно 🥳");
 
       setTimeout(() => {
         navigate("/");
@@ -45,46 +54,47 @@ export function Register(): JSX.Element {
     } catch (e: unknown) {
       const error = e as ErrorResponseDto;
 
-      errorMessage("Что-то пошло не так 😢!");
-      errorMessage(error.response.data as unknown as string);
+      getErrorMessage("Что-то пошло не так 😢!");
+      getErrorMessage(error.response.data as unknown as string);
 
       console.error(e);
     }
   }
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+
+  const options: ValidationOption = {
+    confirmPassword: [{ fn: (field: string) => isSame(field, password), msg: "Пароли не совпадают" }],
+    email: [{ fn: isValidEmail, msg: "Не валидный email" }],
+    name: [{ fn: isRequired, msg: "Не введено имя пользователя" }],
+    password: [
+      {
+        fn: (field: string) => isCorrectlyLength(field, 6),
+        msg: "Знаков в пароле должно быть больше 6"
+      },
+      {
+        fn: isRequired,
+        msg: "Введите свой пароль"
+      }
+    ]
+  };
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>): Promise<any> {
     e.preventDefault();
-    validation();
-    if (isValid) {
-      await register();
+
+    const errors = isValid({
+      email,
+      name,
+      password,
+      confirmPassword
+    }, options);
+
+    setErrors(errors);
+    if (Object.keys(errors).length) {
+      return;
     }
+    await register();
   }
 
-  function validation(): any {
-    if (password !== confirmPassword) {
-      errorMessage("Пароли не совпадают!");
-
-      isValid = false;
-    }
-
-    if (!isValidEmail(email)) {
-      errorMessage("Не валидный email");
-
-      isValid = false;
-    }
-
-    if (name.trim().length === 0 || password.trim().length === 0) {
-      errorMessage("Не все поля заполнены");
-
-      isValid = false;
-    }
-
-    if (password.trim().length < 6) {
-      errorMessage("Знаков в пароле должно быть больше 6");
-
-      isValid = false;
-    }
-  }
 
   return (
     <>
@@ -101,36 +111,45 @@ export function Register(): JSX.Element {
           <h1>Регистрация</h1>
           <TextField
             id="outlined-username-input"
+            className="field"
             label="Username"
             type="text"
             autoComplete="current-password"
             value={ name }
             onChange={ ({ target }: any): any => setName(target.value) }
           />
+          { errors.name && errors.name.map((error) => <p className="error">{ error }</p>) }
           <TextField
             id="outlined-email-input"
+            className="field"
             label="Email"
             type="email"
             autoComplete="current-password"
             value={ email }
             onChange={ ({ target }: any): any => setEmail(target.value) }
           />
+          { errors.email && errors.email.map((error) => <p className="error">{ error }</p>) }
           <TextField
             id="outlined-password-input"
+            className="field"
             label="Password"
             type="password"
             autoComplete="current-password"
             value={ password }
             onChange={ ({ target }: any): any => setPassword(target.value) }
           />
+          { errors.password && errors.password.map((error) => <p className="error">{ error }</p>) }
+
           <TextField
             id="outlined-confirm-password-input"
+            className="field"
             label="Confirm password"
             type="password"
             autoComplete="current-password"
             value={ confirmPassword }
             onChange={ ({ target }: any): any => setConfirmPassword(target.value) }
           />
+          { errors.confirmPassword && errors.confirmPassword.map((error) => <p className="error">{ error }</p>) }
           <Button type="submit" variant="contained">Зарегистрироваться</Button>
           <Link to="/login">Login</Link>
         </form>
