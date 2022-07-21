@@ -52,7 +52,7 @@ namespace API.Controllers
         {
             var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
 
-            if (user == null) return Unauthorized("Invalid usernname");
+            if (user == null) return Unauthorized("Invalid email");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));

@@ -7,3 +7,12 @@
   display: flex;
   flex-direction: column;
 }
+
+.error {
+  color: rgb(252, 146, 158);
+  margin: 5px 0 10px;
+}
+
+.field {
+  margin-bottom: 10px !important;
+}
